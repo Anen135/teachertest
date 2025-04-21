@@ -1,0 +1,52 @@
+  datasource db {
+    provider = "sqlite"
+    url      = env("DATABASE_URL")
+  }
+
+  generator client {
+    provider = "prisma-client-js"
+  }
+
+  model Test {
+    id        String      @id @default(uuid())
+    resultId String      @unique @default(uuid())
+    createdAt DateTime    @default(now())
+    title     String
+    questions Question[]
+    results   Result[]
+  }
+
+  model Result {
+    id        String   @id @default(uuid())
+    testId    String
+    userName  String?  
+    test      Test      @relation(fields: [testId], references: [id])
+    responses Response[] // Added opposite relation
+  }
+
+  model Question {
+    id        String      @id @default(uuid())
+    content   String
+    testId    String
+    answers   Answer[]    @relation("QuestionAnswers") // Named relation
+    responses Response[]  // Added opposite relation
+    test      Test        @relation(fields: [testId], references: [id])
+  }
+
+  model Response {
+    id         String   @id @default(uuid())
+    resultId   String
+    result     Result   @relation(fields: [resultId], references: [id])
+    questionId String
+    question   Question @relation(fields: [questionId], references: [id])
+    content    String   
+    isCorrect  Boolean  
+  }
+
+  model Answer {
+    id         String    @id @default(uuid())
+    content    String
+    questionId String?
+    question   Question? @relation("QuestionAnswers", fields: [questionId], references: [id]) // Named relation
+    isCorrect  Boolean
+  }
